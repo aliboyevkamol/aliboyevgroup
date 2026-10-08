@@ -1,0 +1,11 @@
+CREATE TABLE carts (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE TABLE cart_items (
+  cart_id BIGINT NOT NULL REFERENCES carts(id) ON DELETE CASCADE,
+  product_id BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  quantity INT NOT NULL CHECK (quantity BETWEEN 1 AND 99),
+  PRIMARY KEY (cart_id, product_id)
+);

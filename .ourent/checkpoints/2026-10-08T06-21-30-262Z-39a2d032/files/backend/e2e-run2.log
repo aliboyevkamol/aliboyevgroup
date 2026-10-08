@@ -1,0 +1,72 @@
+PASS | GET /products -> 200, 8 records
+PASS | GET /projects -> 200, 6 records
+PASS | GET /posts -> 200, 6 records
+PASS | GET /portfolio -> 200, 8 records
+PASS | register rejects invalid input -> 422 {"confirm_password":"passwords do not match","email":"must be a valid email address","password":"must be 8-128 characters"}
+PASS | register creates account -> 200
+PASS | register sets refresh cookie cookies: kamol_rt
+PASS | duplicate email rejected -> 409
+PASS | wrong password rejected -> 401
+PASS | GET /auth/me with token -> 200 USER
+PASS | GET /auth/me without token = 401 -> 401
+PASS | admin endpoint forbidden for normal user -> 403
+PASS | admin endpoint forbidden anonymously -> 401
+PASS | product payload hides download_url keys: id,title,slug,category,description,content,price,old_price,currency,cover_image,demo_url,demo_type,live_url,mock_variant,featured,published,has_download,technologies,features,created_at,updated_at
+PASS | products have price/featured/slug id=8 slug=workflow-automation-pack
+PASS | add favorite -> 200
+PASS | duplicate favorite handled -> 200
+PASS | favorites list -> 200, 1 items
+PASS | product like works -> 404
+PASS | post comment -> 201
+PASS | public comments list -> 200, 7
+PASS | reply to comment -> 201
+PASS | like comment -> 200
+PASS | contact form accepted -> 201
+PASS | contact form validates -> 422
+PASS | add to cart -> 200
+PASS | cart persists on server -> qty=2
+PASS | cart total computed server-side subtotal=90 expected=90
+PASS | create order -> 201 order=KA-261007-053435 total=90
+PASS | idempotent order (no duplicate) -> 8 vs 8
+PASS | order not readable anonymously -> 401
+PASS | create payment -> 201 provider=test checkout=
+PASS | test provider completes payment -> 200
+PASS | order marked PAID after verified webhook -> PAID
+PASS | purchased product access granted -> 200 download=undefined
+PASS | cart cleared after payment -> 0 items
+PASS | purchases list shows product -> 1
+PASS | order history -> 1 orders
+PASS | forged webhook rejected -> 401
+PASS | path traversal blocked -> 404
+PASS | backend files not served -> 404
+PASS | dotfiles not served -> 404
+PASS | static / -> 200
+PASS | static /index.html -> 200
+PASS | static /store.html -> 200
+PASS | static /product.html -> 200
+PASS | static /cart.html -> 200
+PASS | static /checkout.html -> 200
+PASS | static /payment.html -> 200
+PASS | static /profile.html -> 200
+PASS | static /login.html -> 200
+PASS | static /register.html -> 200
+PASS | static /blog.html -> 200
+PASS | static /article.html -> 200
+PASS | static /projects.html -> 200
+PASS | static /project-detail.html -> 200
+PASS | static /about.html -> 200
+PASS | static /contact.html -> 200
+PASS | static /skills.html -> 200
+PASS | static /admin/ -> 200
+PASS | static /style.css -> 200
+PASS | static /app.js -> 200
+PASS | static /admin/app.js -> 200
+PASS | static /admin/style.css -> 200
+PASS | static /api/v1/openapi.yaml -> 200
+PASS | static /docs -> 200
+PASS | security headers present X-Content-Type-Options=nosniff X-Frame-Options=SAMEORIGIN Referrer-Policy=strict-origin-when-cross-origin
+PASS | API sends CSP default-src 'none'; frame-ancestors 'non
+PASS | auth rate limiting triggers 429 
+PASS | logout ok -> 200
+
+==== E2E SUMMARY: 70 passed, 0 failed, 70 total ====

@@ -1,0 +1,48 @@
+# Local development / single-server deployment.
+#   cp .env.example .env   (edit secrets)   then   docker compose up -d --build
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-kamol}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kamol}
+      POSTGRES_DB: ${POSTGRES_DB:-kamol}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kamol} -d ${POSTGRES_DB:-kamol}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    ports:
+      - "127.0.0.1:5432:5432"   # bound to localhost only
+
+  backend:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-kamol}:${POSTGRES_PASSWORD:-kamol}@postgres:5432/${POSTGRES_DB:-kamol}?sslmode=disable
+      STATIC_DIR: /frontend            # the backend also serves the website (single origin: no CORS needed)
+    volumes:
+      - uploads:/data/uploads
+      - ..:/frontend:ro
+    ports:
+      - "8080:8080"
+
+  pgadmin:                           # optional: docker compose --profile tools up -d
+    image: dpage/pgadmin4:8
+    profiles: ["tools"]
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "127.0.0.1:5050:80"
+
+volumes:
+  pgdata:
+  uploads:

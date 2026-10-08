@@ -1,0 +1,33 @@
+# Local verification override: uses only images already present on this machine.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-kamol}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kamol}
+      POSTGRES_DB: ${POSTGRES_DB:-kamol}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kamol} -d ${POSTGRES_DB:-kamol}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    ports:
+      - "127.0.0.1:55432:5432"
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-kamol}:${POSTGRES_PASSWORD:-kamol}@postgres:5432/${POSTGRES_DB:-kamol}?sslmode=disable
+      STATIC_DIR: /frontend
+    volumes:
+      - ..:/frontend:ro
+    ports:
+      - "8080:8080"

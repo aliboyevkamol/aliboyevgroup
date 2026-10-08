@@ -1,0 +1,7 @@
+CREATE TABLE contact_messages (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL, email TEXT NOT NULL, phone TEXT NOT NULL DEFAULT '',
+  subject TEXT NOT NULL DEFAULT '', message TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'NEW' CHECK (status IN ('NEW','READ','REPLIED','ARCHIVED')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);

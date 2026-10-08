@@ -1,0 +1,15 @@
+go: downloading github.com/lib/pq v1.10.9
+?   	kamolportfolio/backend/cmd/server	[no test files]
+?   	kamolportfolio/backend/config	[no test files]
+?   	kamolportfolio/backend/database	[no test files]
+?   	kamolportfolio/backend/docs	[no test files]
+ok  	kamolportfolio/backend/internal/api	38.039s
+?   	kamolportfolio/backend/internal/auth	[no test files]
+?   	kamolportfolio/backend/internal/payments	[no test files]
+?   	kamolportfolio/backend/middleware	[no test files]
+?   	kamolportfolio/backend/pkg/logger	[no test files]
+?   	kamolportfolio/backend/pkg/mail	[no test files]
+?   	kamolportfolio/backend/pkg/response	[no test files]
+?   	kamolportfolio/backend/pkg/slug	[no test files]
+?   	kamolportfolio/backend/pkg/storage	[no test files]
+DONE_EXIT_0

@@ -1,0 +1,588 @@
+{
+ "products": [
+  {
+   "title": "Premium E-commerce Website",
+   "category": "websites",
+   "description": "A fast, responsive online store front-end with catalogue, cart and checkout screens.",
+   "price": 49,
+   "technologies": [
+    "HTML",
+    "CSS",
+    "JavaScript"
+   ],
+   "features": [
+    "Product catalogue and filters",
+    "Cart and checkout UI",
+    "Fully responsive",
+    "Easy to restyle"
+   ],
+   "featured": true,
+   "mock_variant": 4
+  },
+  {
+   "title": "Telegram Auto Service Bot",
+   "category": "bots",
+   "description": "A bot that takes orders, answers common questions and notifies you of new requests.",
+   "price": 39,
+   "technologies": [
+    "Python",
+    "Telegram Bot API"
+   ],
+   "features": [
+    "Menu-driven ordering",
+    "Admin notifications",
+    "Multi-language ready",
+    "Simple config file"
+   ],
+   "featured": true,
+   "mock_variant": 2
+  },
+  {
+   "title": "Admin Dashboard",
+   "category": "templates",
+   "description": "A dark dashboard template with charts, tables, filters and a collapsible sidebar.",
+   "price": 59,
+   "technologies": [
+    "HTML",
+    "CSS",
+    "JavaScript"
+   ],
+   "features": [
+    "Charts and KPI cards",
+    "Sortable tables",
+    "Dark theme",
+    "Mobile layout"
+   ],
+   "featured": false,
+   "mock_variant": 3
+  },
+  {
+   "title": "AI Assistant",
+   "category": "ai",
+   "description": "A chat assistant starter that connects to an AI provider and your own business data.",
+   "price": 79,
+   "technologies": [
+    "Node.js",
+    "AI APIs"
+   ],
+   "features": [
+    "Chat interface",
+    "Provider-agnostic API layer",
+    "Conversation history",
+    "Prompt configuration"
+   ],
+   "featured": false,
+   "mock_variant": 2
+  },
+  {
+   "title": "SaaS Starter",
+   "category": "saas",
+   "description": "A starting point for a subscription product: auth, dashboard and account screens.",
+   "price": 99,
+   "technologies": [
+    "Next.js",
+    "Supabase",
+    "PostgreSQL"
+   ],
+   "features": [
+    "Authentication flow",
+    "Dashboard shell",
+    "Account settings",
+    "Database schema"
+   ],
+   "featured": true,
+   "mock_variant": 1
+  },
+  {
+   "title": "Business Management System",
+   "category": "saas",
+   "description": "Manage clients, invoices and tasks from one panel.",
+   "price": 129,
+   "technologies": [
+    "Node.js",
+    "PostgreSQL",
+    "REST API"
+   ],
+   "features": [
+    "Client records",
+    "Invoices",
+    "Task board",
+    "REST API"
+   ],
+   "featured": false,
+   "mock_variant": 3
+  },
+  {
+   "title": "Landing Page Pack",
+   "category": "templates",
+   "description": "Five conversion-focused landing page layouts in a consistent design system.",
+   "price": 29,
+   "technologies": [
+    "HTML",
+    "CSS"
+   ],
+   "features": [
+    "Five layouts",
+    "Pure HTML and CSS",
+    "Responsive",
+    "Dark and light themes"
+   ],
+   "featured": false,
+   "mock_variant": 4
+  },
+  {
+   "title": "Workflow Automation Pack",
+   "category": "automation",
+   "description": "Ready-made workflows for lead capture, notifications and spreadsheet sync.",
+   "price": 45,
+   "technologies": [
+    "n8n",
+    "Make",
+    "Google Sheets API"
+   ],
+   "features": [
+    "Lead capture flow",
+    "Notification flow",
+    "Sheets sync",
+    "Setup notes"
+   ],
+   "featured": false,
+   "mock_variant": 5
+  }
+ ],
+ "projects": [
+  {
+   "title": "Digital School OS",
+   "slug": "digital-school",
+   "category": "EdTech / SaaS",
+   "description": "A digital education platform designed to manage learning, courses, students, progress and educational workflows.",
+   "problem": "Learning centres juggle courses, students and progress across disconnected tools.",
+   "solution": "One platform where courses, student progress and workflows live together, with AI assistance layered on top.",
+   "outcome": "A single workspace for managing learning end to end.",
+   "features": [
+    "Course and lesson management",
+    "Student accounts and progress tracking",
+    "Role-based dashboards",
+    "AI-assisted learning workflows"
+   ],
+   "technologies": [
+    "React",
+    "Next.js",
+    "Supabase",
+    "PostgreSQL",
+    "AI"
+   ],
+   "architecture": [
+    "Web App",
+    "API",
+    "Auth",
+    "PostgreSQL",
+    "AI"
+   ],
+   "mock_variant": 1
+  },
+  {
+   "title": "AI Bosh Buxgalter",
+   "slug": "ai-bosh-buxgalter",
+   "category": "AI / Business Automation",
+   "description": "An AI-powered accounting assistant concept designed to automate accounting workflows and business financial operations.",
+   "problem": "Routine accounting work is repetitive and slow for small businesses.",
+   "solution": "An assistant that handles questions and routine bookkeeping steps through a chat interface backed by structured financial data.",
+   "outcome": "A concept showing how accounting workflows can be automated with AI.",
+   "features": [
+    "Chat-based accounting assistant",
+    "Automated routine workflows",
+    "Structured ledger data",
+    "API integrations"
+   ],
+   "technologies": [
+    "AI",
+    "APIs",
+    "Automation",
+    "PostgreSQL",
+    "Go"
+   ],
+   "architecture": [
+    "Chat UI",
+    "Go API",
+    "AI Layer",
+    "PostgreSQL"
+   ],
+   "mock_variant": 2
+  },
+  {
+   "title": "OffPay",
+   "slug": "offpay",
+   "category": "SaaS / Business",
+   "description": "A business payment and invoice management platform.",
+   "problem": "Businesses need one clear place to track invoices and payments.",
+   "solution": "An admin platform with a dashboard for payments, invoices and reporting.",
+   "outcome": "A SaaS-style admin panel for day-to-day payment operations.",
+   "features": [
+    "Invoice management",
+    "Payment tracking dashboard",
+    "Reporting views",
+    "REST API"
+   ],
+   "technologies": [
+    "JavaScript",
+    "Node.js",
+    "PostgreSQL",
+    "REST API"
+   ],
+   "architecture": [
+    "Admin UI",
+    "REST API",
+    "Business Logic",
+    "PostgreSQL"
+   ],
+   "mock_variant": 3
+  },
+  {
+   "title": "Aliboyev Group",
+   "slug": "aliboyev-group",
+   "category": "Business Platform",
+   "description": "A modern business platform with product, service and digital infrastructure.",
+   "problem": "A growing business needs a single, credible digital presence for products and services.",
+   "solution": "A multi-page platform with a product catalogue and services, connected to a backend API.",
+   "outcome": "A complete business platform from catalogue to backend.",
+   "features": [
+    "Product and service pages",
+    "Responsive storefront",
+    "Backend API connection",
+    "Admin-managed content"
+   ],
+   "technologies": [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "Backend API"
+   ],
+   "architecture": [
+    "Frontend",
+    "API",
+    "Database",
+    "Cloud"
+   ],
+   "mock_variant": 4
+  },
+  {
+   "title": "Automation Systems",
+   "slug": "automation-systems",
+   "category": "AI / Automation",
+   "description": "Workflow automation that connects bots, spreadsheets, APIs and AI into systems that run on their own.",
+   "problem": "Teams lose hours on manual, repetitive steps between tools.",
+   "solution": "Automated pipelines triggered by messages, forms or schedules that move data between services.",
+   "outcome": "Repeatable automations that replace manual work.",
+   "features": [
+    "Telegram bot workflows",
+    "Spreadsheet sync",
+    "AI-powered steps",
+    "Scheduled jobs"
+   ],
+   "technologies": [
+    "n8n",
+    "Make",
+    "Telegram Bot API",
+    "Google Sheets API"
+   ],
+   "architecture": [
+    "Trigger",
+    "Workflow",
+    "AI Step",
+    "Output"
+   ],
+   "mock_variant": 5
+  }
+ ],
+ "posts": [
+  {
+   "title": "How I structure a modern SaaS project",
+   "category": "SaaS",
+   "excerpt": "A thin web app, a typed API, one database and clear boundaries. The structure I start every SaaS with.",
+   "content": "<p>Every SaaS I start follows the same shape: a thin web app, a clear API, one database and a boundary for anything slow.</p><h2>Start with the data model</h2><p>Before screens, I list the entities, who owns them and what a user can do with them. Most rework later traces back to an unclear ownership rule.</p><pre>users → workspaces → projects → items</pre><h2>Keep the API boring</h2><p>Plain REST endpoints, consistent errors and authentication handled in one place.</p>",
+   "reading_time": "6 min",
+   "published_at": "2026-09-01T00:00:00.000Z",
+   "author": "Kamol Aliboyev"
+  },
+  {
+   "title": "Building AI-powered business automation",
+   "category": "AI",
+   "excerpt": "Where AI actually helps in a business workflow, and where a plain script is the better tool.",
+   "content": "<p>AI is best used for the fuzzy steps in a workflow: reading text, classifying requests, drafting replies.</p><h2>Keep the deterministic parts deterministic</h2><p>Calculations, permissions and payments should never depend on a model. Wrap the AI step so the rest of the pipeline stays predictable.</p><pre>trigger → validate → AI step → human check → save</pre><h2>Always leave a review step</h2><p>For anything touching money or customers, a person confirms the result before it is final.</p>",
+   "reading_time": "7 min",
+   "published_at": "2026-08-01T00:00:00.000Z",
+   "author": "Kamol Aliboyev"
+  },
+  {
+   "title": "Frontend architecture for large dashboards",
+   "category": "Development",
+   "excerpt": "Keeping data-heavy interfaces fast and maintainable as screens and features pile up.",
+   "content": "<p>Dashboards grow quickly. The trick is to keep each screen small and the data flow obvious.</p><h2>One source of truth</h2><p>Keep state in one place per screen and derive everything else from it.</p><pre>const state = { filter: \"all\", sort: \"new\" };\nfunction render() { /* draw from state */ }</pre><h2>Render only what changed</h2><p>Large tables need pagination or virtualisation long before they feel slow.</p>",
+   "reading_time": "8 min",
+   "published_at": "2026-07-01T00:00:00.000Z",
+   "author": "Kamol Aliboyev"
+  },
+  {
+   "title": "Supabase vs PostgreSQL for SaaS",
+   "category": "SaaS",
+   "excerpt": "Supabase is PostgreSQL with batteries included. When the extras help and when they get in the way.",
+   "content": "<p>Supabase is PostgreSQL plus authentication, storage and auto-generated APIs.</p><h2>When Supabase wins</h2><p>Early products where speed matters and the team is small.</p><h2>When plain PostgreSQL wins</h2><p>When you need full control over hosting, migrations and custom backend logic.</p><pre>SELECT * FROM projects WHERE owner_id = $1;</pre>",
+   "reading_time": "5 min",
+   "published_at": "2026-06-01T00:00:00.000Z",
+   "author": "Kamol Aliboyev"
+  },
+  {
+   "title": "How I build Telegram automation systems",
+   "category": "Automation",
+   "excerpt": "From a simple menu bot to a full ordering and notification system.",
+   "content": "<p>A Telegram bot is a small web service that receives messages and replies. Treat it like any other backend.</p><h2>Design the conversation first</h2><p>Sketch the menu and every state before writing handlers.</p><pre>/start → menu → choose service → confirm → notify admin</pre><h2>Connect the rest</h2><p>Spreadsheets, databases and AI steps plug in behind the handlers.</p>",
+   "reading_time": "6 min",
+   "published_at": "2026-05-01T00:00:00.000Z",
+   "author": "Kamol Aliboyev"
+  }
+ ],
+ "skills": [
+  {
+   "category": "frontend",
+   "name": "HTML",
+   "level": 92
+  },
+  {
+   "category": "frontend",
+   "name": "CSS",
+   "level": 90
+  },
+  {
+   "category": "frontend",
+   "name": "JavaScript",
+   "level": 92
+  },
+  {
+   "category": "frontend",
+   "name": "React",
+   "level": 90
+  },
+  {
+   "category": "frontend",
+   "name": "Next.js",
+   "level": 88
+  },
+  {
+   "category": "frontend",
+   "name": "Tailwind",
+   "level": 85
+  },
+  {
+   "category": "frontend",
+   "name": "Vite",
+   "level": 80
+  },
+  {
+   "category": "backend",
+   "name": "Node.js",
+   "level": 90
+  },
+  {
+   "category": "backend",
+   "name": "Python",
+   "level": 85
+  },
+  {
+   "category": "backend",
+   "name": "Go",
+   "level": 70
+  },
+  {
+   "category": "backend",
+   "name": "REST API",
+   "level": 90
+  },
+  {
+   "category": "backend",
+   "name": "Prisma",
+   "level": 80
+  },
+  {
+   "category": "backend",
+   "name": "Authentication",
+   "level": 85
+  },
+  {
+   "category": "database",
+   "name": "PostgreSQL",
+   "level": 85
+  },
+  {
+   "category": "database",
+   "name": "Supabase",
+   "level": 85
+  },
+  {
+   "category": "database",
+   "name": "Firebase",
+   "level": 80
+  },
+  {
+   "category": "database",
+   "name": "SQL",
+   "level": 85
+  },
+  {
+   "category": "tools",
+   "name": "Git",
+   "level": 90
+  },
+  {
+   "category": "tools",
+   "name": "GitHub",
+   "level": 90
+  },
+  {
+   "category": "tools",
+   "name": "Docker",
+   "level": 80
+  },
+  {
+   "category": "tools",
+   "name": "Linux",
+   "level": 80
+  },
+  {
+   "category": "tools",
+   "name": "Vercel",
+   "level": 85
+  },
+  {
+   "category": "tools",
+   "name": "AWS",
+   "level": 70
+  },
+  {
+   "category": "tools",
+   "name": "DigitalOcean",
+   "level": 75
+  },
+  {
+   "category": "tools",
+   "name": "Figma",
+   "level": 75
+  },
+  {
+   "category": "ai",
+   "name": "OpenAI",
+   "level": 88
+  },
+  {
+   "category": "ai",
+   "name": "Claude",
+   "level": 88
+  },
+  {
+   "category": "ai",
+   "name": "Gemini",
+   "level": 85
+  },
+  {
+   "category": "ai",
+   "name": "AI APIs",
+   "level": 88
+  },
+  {
+   "category": "ai",
+   "name": "AI Agents",
+   "level": 80
+  },
+  {
+   "category": "ai",
+   "name": "Prompt Engineering",
+   "level": 88
+  },
+  {
+   "category": "automation",
+   "name": "n8n",
+   "level": 85
+  },
+  {
+   "category": "automation",
+   "name": "Make",
+   "level": 80
+  },
+  {
+   "category": "automation",
+   "name": "Telegram Bot API",
+   "level": 90
+  },
+  {
+   "category": "automation",
+   "name": "Google Sheets API",
+   "level": 80
+  }
+ ],
+ "site": {
+  "hero_title": "Building [[digital products]] that actually work.",
+  "hero_description": "I build scalable web applications, SaaS platforms, automation systems and AI-powered products.",
+  "social_links": {
+   "github": "https://github.com/your-username",
+   "linkedin": "https://linkedin.com/in/your-username",
+   "telegram": "https://t.me/your_username",
+   "email": "mailto:your-email@example.com"
+  }
+ },
+ "services": [
+  {
+   "title": "Full-Stack Development",
+   "description": ""
+  },
+  {
+   "title": "SaaS Development",
+   "description": ""
+  },
+  {
+   "title": "AI Integration",
+   "description": ""
+  },
+  {
+   "title": "Automation Systems",
+   "description": ""
+  },
+  {
+   "title": "Business Platforms",
+   "description": ""
+  },
+  {
+   "title": "Telegram Bots",
+   "description": ""
+  },
+  {
+   "title": "API Development",
+   "description": ""
+  },
+  {
+   "title": "UI Engineering",
+   "description": ""
+  }
+ ],
+ "experiences": [
+  {
+   "title": "Full-Stack Development",
+   "description": "Interfaces, APIs and databases shipped as one product."
+  },
+  {
+   "title": "SaaS Development",
+   "description": "Dashboards, admin panels and business platforms such as OffPay."
+  },
+  {
+   "title": "AI Integration",
+   "description": "AI APIs and agents connected to real business workflows."
+  },
+  {
+   "title": "Automation",
+   "description": "Telegram bots, n8n and Make pipelines."
+  },
+  {
+   "title": "Digital Products",
+   "description": "Templates, systems and software packaged for sale in the store."
+  }
+ ]
+}

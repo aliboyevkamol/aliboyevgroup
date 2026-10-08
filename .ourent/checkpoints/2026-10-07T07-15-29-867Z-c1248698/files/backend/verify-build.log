@@ -1,0 +1,103 @@
+ Image backend-backend Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 565B 1.3s done
+#1 DONE 1.4s
+
+#2 [internal] load build definition from Dockerfile.local
+#2 transferring dockerfile:
+#2 transferring dockerfile: 622B 0.1s done
+#2 DONE 0.4s
+
+#3 [internal] load metadata for docker.io/library/alpine:3.20
+#3 ...
+
+#4 [internal] load metadata for docker.io/library/golang:1.24.4-alpine3.21
+#4 DONE 0.8s
+
+#3 [internal] load metadata for docker.io/library/alpine:3.20
+#3 DONE 0.8s
+
+#5 [internal] load .dockerignore
+#5 transferring context:
+#5 transferring context: 2B 0.0s done
+#5 DONE 0.4s
+
+#6 [stage-1 1/4] FROM docker.io/library/alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+#6 resolve docker.io/library/alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc 0.6s done
+#6 sha256:25f1d6b1951ac8eb3740558fe94cb83d377bdadf95fd9f98b50d2e1b96130471 3.63MB / 3.63MB 18.7s done
+#6 extracting sha256:25f1d6b1951ac8eb3740558fe94cb83d377bdadf95fd9f98b50d2e1b96130471 8.5s done
+#6 DONE 30.3s
+
+#7 [stage-1 2/4] RUN apk add --no-cache ca-certificates tzdata && adduser -D -u 10001 app && mkdir -p /data/uploads && chown -R app /data
+#7 7.819 fetch https://dl-cdn.alpinelinux.org/alpine/v3.20/main/x86_64/APKINDEX.tar.gz
+#7 17.35 fetch https://dl-cdn.alpinelinux.org/alpine/v3.20/community/x86_64/APKINDEX.tar.gz
+#7 29.84 (1/2) Installing ca-certificates (20260413-r0)
+#7 31.44 (2/2) Installing tzdata (2026b-r0)
+#7 37.13 Executing busybox-1.36.1-r31.trigger
+#7 37.60 Executing ca-certificates-20260413-r0.trigger
+#7 39.30 OK: 10 MiB in 16 packages
+#7 DONE 43.2s
+
+#8 [stage-1 3/4] WORKDIR /app
+#8 DONE 3.5s
+
+#9 [internal] load build context
+#9 DONE 0.0s
+
+#10 [build 1/6] FROM docker.io/library/golang:1.24.4-alpine3.21@sha256:56a23791af0f77c87b049230ead03bd8c3ad41683415ea4595e84ce7eada121a
+#10 resolve docker.io/library/golang:1.24.4-alpine3.21@sha256:56a23791af0f77c87b049230ead03bd8c3ad41683415ea4595e84ce7eada121a
+#10 resolve docker.io/library/golang:1.24.4-alpine3.21@sha256:56a23791af0f77c87b049230ead03bd8c3ad41683415ea4595e84ce7eada121a 1.2s done
+#10 DONE 1.3s
+
+#10 [build 1/6] FROM docker.io/library/golang:1.24.4-alpine3.21@sha256:56a23791af0f77c87b049230ead03bd8c3ad41683415ea4595e84ce7eada121a
+#10 CACHED
+
+#11 [build 2/6] WORKDIR /src
+#11 DONE 2.1s
+
+#9 [internal] load build context
+#9 transferring context: 293.92kB 1.5s done
+#9 DONE 2.6s
+
+#12 [build 3/6] COPY go.mod go.sum ./
+#12 DONE 1.2s
+
+#13 [build 4/6] RUN go mod download
+#13 DONE 10.8s
+
+#14 [build 5/6] COPY . .
+#14 DONE 1.1s
+
+#15 [build 6/6] RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/server ./cmd/server
+#15 DONE 254.3s
+
+#16 [stage-1 4/4] COPY --from=build /out/server /app/server
+#16 DONE 0.9s
+
+#17 exporting to image
+#17 exporting layers
+#17 exporting layers 4.0s done
+#17 exporting manifest sha256:6e5ef8cbb403ea1fe92c1f5f38abcd90bc8cf5928aad8766cb2fb4c85ed5e99f 0.1s done
+#17 exporting config sha256:7638c635466285a110f2f1c73574fa3239cb7a9fcd077d4951e89d1fb3823e92
+#17 exporting config sha256:7638c635466285a110f2f1c73574fa3239cb7a9fcd077d4951e89d1fb3823e92 0.1s done
+#17 exporting attestation manifest sha256:b8ddb7e227f305d9b29825939194f6379222028514da1660f61527c5fbda82a3 0.1s done
+#17 exporting manifest list sha256:60125185a4b35865f06722e2396f710e9659af111ce7c3461002483faec63ee2 0.1s done
+#17 naming to docker.io/library/backend-backend:latest 0.0s done
+#17 unpacking to docker.io/library/backend-backend:latest
+#17 unpacking to docker.io/library/backend-backend:latest 0.9s done
+#17 DONE 5.9s
+
+#18 resolving provenance for metadata file
+#18 DONE 0.8s
+ Image backend-backend Built 
+ Container backend-postgres-1 Recreate 
+ Container backend-postgres-1 Recreated 
+ Container backend-backend-1 Recreate 
+ Container backend-backend-1 Recreated 
+ Container backend-postgres-1 Starting 
+ Container backend-postgres-1 Started 
+ Container backend-postgres-1 Waiting 
+ Container backend-postgres-1 Healthy 
+ Container backend-backend-1 Starting 
+ Container backend-backend-1 Started 
+DONE_EXIT_0 

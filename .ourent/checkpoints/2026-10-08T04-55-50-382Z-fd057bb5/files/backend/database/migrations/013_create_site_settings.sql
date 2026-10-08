@@ -1,0 +1,19 @@
+CREATE TABLE site_settings (
+  key TEXT PRIMARY KEY,
+  value JSONB NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE TABLE skills (
+  id BIGSERIAL PRIMARY KEY,
+  category TEXT NOT NULL, name TEXT NOT NULL,
+  level INT NOT NULL CHECK (level BETWEEN 0 AND 100),
+  position INT NOT NULL DEFAULT 0
+);
+CREATE TABLE services (
+  id BIGSERIAL PRIMARY KEY,
+  title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', position INT NOT NULL DEFAULT 0
+);
+CREATE TABLE experiences (
+  id BIGSERIAL PRIMARY KEY,
+  title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', period TEXT NOT NULL DEFAULT '', position INT NOT NULL DEFAULT 0
+);

@@ -1,0 +1,61 @@
+PASS | browser / -> 200, header=true links=7 footer=true
+PASS | browser content index {"fp":3,"fs":3}
+PASS | browser /about.html -> 200, header=true links=7 footer=true
+PASS | browser /skills.html -> 200, header=true links=7 footer=true
+PASS | browser content skills {"bars":1,"pills":7}
+PASS | browser /projects.html -> 200, header=true links=7 footer=true
+PASS | browser content projects {"projects":6}
+PASS | browser /project-detail.html?project=digital-school -> 200, header=true links=7 footer=true
+PASS | browser content project-detail {"title":1,"discussion":1,"flow":5}
+PASS | browser /store.html -> 200, header=true links=7 footer=true
+PASS | browser content store {"products":8,"pills":7}
+PASS | browser /product.html?id=1 -> 200, header=true links=7 footer=true
+PASS | browser content product {"title":1,"buy":1,"related":3}
+PASS | browser /blog.html -> 200, header=true links=7 footer=true
+PASS | browser content blog {"posts":6}
+PASS | browser /article.html?id=1 -> 200, header=true links=7 footer=true
+PASS | browser content article {"title":1,"discussion":1}
+PASS | browser /contact.html -> 200, header=true links=7 footer=true
+PASS | browser /cart.html -> 200, header=true links=7 footer=true
+PASS | browser /checkout.html -> 200, header=true links=7 footer=true
+PASS | browser /payment.html?order=1 -> 200, header=true links=7 footer=true
+PASS | browser /login.html -> 200, header=true links=7 footer=true
+PASS | browser /register.html -> 200, header=true links=7 footer=true
+PASS | browser /profile.html -> 200, header=true links=7 footer=true
+PASS | browser /admin/ -> 200, header=false links=0 footer=false
+PASS | theme toggle works dark -> light
+PASS | language toggle works nav="Главная"
+PASS | add to cart updates badge badge=1, storeCards=8
+PASS | cart page lists item + total rows=1 total=$45
+PASS | cart quantity increase qty=2
+PASS | checkout requires login 
+PASS | store search filters products all=8 searched=1
+PASS | store empty state shown 
+PASS | store price sort ascending 29,39,45,49,59,79,99,129
+PASS | buy now navigates to checkout url=http://localhost:8080/checkout.html product="Telegram Auto Service Bot"
+PASS | register -> profile redirect url=http://localhost:8080/profile.html
+PASS | profile shows user name="Browser Tester"
+PASS | favorite saved to profile favCards=1
+PASS | checkout creates order -> payment page url=http://localhost:8080/payment.html?order=4
+PASS | invalid card rejected in browser err="Check the card details: name, 13–19 digit number, MM/YY expiry and CVV."
+PASS | test payment completes in UI url=http://localhost:8080/payment.html?order=4
+PASS | payment page shows product access rows=3
+PASS | admin login shows panel panelVisible=true navItems=8
+PASS | admin dashboard renders data rows=9
+PASS | no uncaught page errors 
+FAIL | no console errors http://localhost:8080/store.html :: Failed to load resource: the server responded with a status of 401 (Unauthorized) | http://localhost:8080/cart.html :: Failed to load resource: the server responded with a status of 401 (Unauthorized) | http://localhost:8080/product.html?id=2 :: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+PASS | no failed network requests 
+
+==== BROWSER E2E: 46 passed, 1 failed, 47 total ====
+FAILURES:
+ - no console errors http://localhost:8080/store.html :: Failed to load resource: the server responded with a status of 401 (Unauthorized) | http://localhost:8080/cart.html :: Failed to load resource: the server responded with a status of 401 (Unauthorized) | http://localhost:8080/product.html?id=2 :: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+console errors: 3 | page errors: 0 | failed requests: 0
+CONSOLE:
+http://localhost:8080/store.html :: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+http://localhost:8080/cart.html :: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+http://localhost:8080/product.html?id=2 :: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+HTTP>=400 (3):
+401 POST http://localhost:8080/api/v1/cart/items (type=fetch) from http://localhost:8080/store.html
+401 POST http://localhost:8080/api/v1/cart/items (type=fetch) from http://localhost:8080/cart.html
+401 POST http://localhost:8080/api/v1/cart/items (type=fetch) from http://localhost:8080/product.html?id=2

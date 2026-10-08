@@ -1,0 +1,9 @@
+[req] GET http://localhost:8080/store.html | type=document
+[req] GET https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap | type=stylesheet
+[req] GET http://localhost:8080/style.css | type=stylesheet
+[req] GET http://localhost:8080/app.js | type=script
+[req] GET http://localhost:8080/api/v1/products?limit=100 | type=fetch
+[req] GET http://localhost:8080/api/v1/projects?limit=50 | type=fetch
+[req] GET http://localhost:8080/api/v1/posts?limit=100 | type=fetch
+[req] GET http://localhost:8080/api/v1/portfolio | type=fetch
+[req] GET https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2 | type=font

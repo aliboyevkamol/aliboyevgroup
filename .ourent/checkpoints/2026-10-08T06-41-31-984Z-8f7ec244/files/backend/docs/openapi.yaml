@@ -1,0 +1,1209 @@
+openapi: 3.0.3
+info:
+  title: Kamol Aliboyev Portfolio API
+  version: 1.0.0
+  description: |
+    REST API for the portfolio, store, blog, comments, cart, orders, payments and admin panel.
+    Every response uses an envelope: `{success, data, pagination?}` or `{success:false, message, error:{code, fields?}}`.
+    Authentication: short-lived Bearer access token plus an HttpOnly refresh cookie (`kamol_rt`).
+servers:
+  - url: /api/v1
+components:
+  securitySchemes:
+    bearer: {type: http, scheme: bearer, bearerFormat: JWT}
+  schemas:
+    Error:
+      type: object
+      properties:
+        success: {type: boolean, example: false}
+        message: {type: string}
+        error: {type: object, properties: {code: {type: string, example: PRODUCT_NOT_FOUND}, fields: {type: object, additionalProperties: {type: string}}}}
+    Pagination:
+      type: object
+      properties: {page: {type: integer}, limit: {type: integer}, total: {type: integer}, pages: {type: integer}}
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: "Create an account and start a session"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"name": "Aziza Karimova", "email": "aziza@example.com", "password": "S3cure-passw0rd", "confirm_password": "S3cure-passw0rd"}
+      responses:
+        "201": {description: Created}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: "Log in (sets the HttpOnly refresh cookie, returns a short-lived access token)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"email": "aziza@example.com", "password": "S3cure-passw0rd"}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: "Revoke the refresh token family and clear the cookie"
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: "Rotate the refresh cookie and get a new access token"
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: "Current user"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: "Request a password reset email (always answers 200)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"email": "aziza@example.com"}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: "Set a new password with a reset token"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"token": "<token from email>", "password": "New-passw0rd-123"}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /me:
+    get:
+      tags: [Users]
+      summary: "Profile"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    patch:
+      tags: [Users]
+      summary: "Update name, avatar or password"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"name": "Aziza K."}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /me/orders:
+    get:
+      tags: [Users]
+      summary: "My orders (paginated)"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /me/purchases:
+    get:
+      tags: [Users]
+      summary: "Products I have access to"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /me/favorites:
+    get:
+      tags: [Users]
+      summary: "My favorite products"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /products:
+    get:
+      tags: [Products]
+      summary: "List published products (search, category, featured, sort, page, limit)"
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /products/{ref}:
+    parameters:
+      - {name: ref, in: path, required: true, schema: {type: string}}
+    get:
+      tags: [Products]
+      summary: "Product by id or slug"
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /products/{id}/access:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      tags: [Products]
+      summary: "Check purchase access and get a 5-minute download URL"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /products/{id}/download:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      tags: [Products]
+      summary: "302 redirect to the signed download URL (purchasers only)"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /products/{id}/favorite:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      tags: [Favorites]
+      summary: "Add to favorites"
+      security: [{bearer: []}]
+      responses:
+        "201": {description: Created}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    delete:
+      tags: [Favorites]
+      summary: "Remove from favorites"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /projects:
+    get:
+      tags: [Projects]
+      summary: "List published projects"
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /projects/{ref}:
+    parameters:
+      - {name: ref, in: path, required: true, schema: {type: string}}
+    get:
+      tags: [Projects]
+      summary: "Project by id or slug (includes like_count / liked)"
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /posts:
+    get:
+      tags: [Blog]
+      summary: "List published posts (search, category, sort, page, limit)"
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /posts/{ref}:
+    parameters:
+      - {name: ref, in: path, required: true, schema: {type: string}}
+    get:
+      tags: [Blog]
+      summary: "Post by id or slug"
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /portfolio:
+    get:
+      tags: [Portfolio]
+      summary: "Hero text, social links, skills, services, experience"
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /contact:
+    post:
+      tags: [Contact]
+      summary: "Send a contact message"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"name": "Jasur", "email": "jasur@example.com", "subject": "Project", "message": "Hello, I have a project idea."}
+      responses:
+        "201": {description: Created}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /posts/{id}/comments:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      tags: [Comments]
+      summary: "Visible comments of a post"
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    post:
+      tags: [Comments]
+      summary: "Comment on a post"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"content": "Great article!"}
+      responses:
+        "201": {description: Created}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /projects/{id}/comments:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      tags: [Comments]
+      summary: "Visible comments of a project"
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    post:
+      tags: [Comments]
+      summary: "Comment on a project"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"content": "Nice work."}
+      responses:
+        "201": {description: Created}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /comments/{id}/reply:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      tags: [Comments]
+      summary: "Reply to a comment (threads stay one level deep)"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"content": "Thanks!"}
+      responses:
+        "201": {description: Created}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /comments/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    patch:
+      tags: [Comments]
+      summary: "Edit my comment"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"content": "Edited text"}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    delete:
+      tags: [Comments]
+      summary: "Delete my comment (soft delete)"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /posts/{id}/like:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      tags: [Likes]
+      summary: "Like a post (idempotent)"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    delete:
+      tags: [Likes]
+      summary: "Remove my like from a post"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /projects/{id}/like:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      tags: [Likes]
+      summary: "Like a project (idempotent)"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    delete:
+      tags: [Likes]
+      summary: "Remove my like from a project"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /comments/{id}/like:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      tags: [Likes]
+      summary: "Like a comment (idempotent)"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    delete:
+      tags: [Likes]
+      summary: "Remove my like from a comment"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /cart:
+    get:
+      tags: [Cart]
+      summary: "Server cart with prices from the database"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    delete:
+      tags: [Cart]
+      summary: "Empty the cart"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /cart/items:
+    post:
+      tags: [Cart]
+      summary: "Add a product (quantity is added to the existing line)"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"product_id": 5, "quantity": 1}
+      responses:
+        "201": {description: Created}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /cart/items/{product_id}:
+    parameters:
+      - {name: product_id, in: path, required: true, schema: {type: string}}
+    patch:
+      tags: [Cart]
+      summary: "Set the quantity (0 removes the line)"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"quantity": 2}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    delete:
+      tags: [Cart]
+      summary: "Remove a line"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /orders:
+    post:
+      tags: [Orders]
+      summary: "Create an order. Prices and totals are always computed on the server. Send an Idempotency-Key header to make retries safe."
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"customer": {"name": "Aziza Karimova", "email": "aziza@example.com", "phone": "+998 90 123 45 67", "country": "Uzbekistan"}, "items": [{"product_id": 5, "quantity": 1}], "coupon": ""}
+      responses:
+        "201": {description: Created}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /orders/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      tags: [Orders]
+      summary: "Order with items and latest payment (owner or admin)"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /payments:
+    post:
+      tags: [Payments]
+      summary: "Create a payment for a pending order"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"order_id": 12}
+      responses:
+        "201": {description: Created}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /payments/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      tags: [Payments]
+      summary: "Payment status (owner)"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /payments/webhook:
+    post:
+      tags: [Payments]
+      summary: "Provider webhook. Signature verified, idempotent by event_id. The ONLY way an order becomes paid."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"event_id": "evt_123", "type": "payment.succeeded", "payment_ref": "test_abc", "amount_cents": 9900, "currency": "USD"}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /payments/test/complete:
+    post:
+      tags: [Payments]
+      summary: "Development only: simulates the provider page and signs a webhook event"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"payment_id": 7, "outcome": "success"}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/dashboard:
+    get:
+      tags: [Admin]
+      summary: "Counters, revenue, recent orders/comments/products"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/products:
+    get:
+      tags: [Admin]
+      summary: "All products incl. drafts and download_url"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    post:
+      tags: [Admin]
+      summary: "Create a product"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"title": "New Bot", "category": "bots", "price": 19.99, "technologies": ["Go"], "features": ["Fast"], "published": true}
+      responses:
+        "201": {description: Created}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/products/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      tags: [Admin]
+      summary: "Get a product"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    patch:
+      tags: [Admin]
+      summary: "Update / publish / feature a product"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"published": true, "featured": true}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    delete:
+      tags: [Admin]
+      summary: "Delete a product"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/projects:
+    get:
+      tags: [Admin]
+      summary: "All projects"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    post:
+      tags: [Admin]
+      summary: "Create a project"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"title": "New Project", "category": "SaaS", "technologies": ["Go"], "published": true}
+      responses:
+        "201": {description: Created}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/projects/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    patch:
+      tags: [Admin]
+      summary: "Update a project"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"featured": true}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    delete:
+      tags: [Admin]
+      summary: "Delete a project"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/posts:
+    get:
+      tags: [Admin]
+      summary: "All posts incl. drafts"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    post:
+      tags: [Admin]
+      summary: "Create a post"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"title": "Hello", "category": "AI", "content": "Text", "published": true}
+      responses:
+        "201": {description: Created}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/posts/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    patch:
+      tags: [Admin]
+      summary: "Update / publish a post"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"published": true}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    delete:
+      tags: [Admin]
+      summary: "Delete a post"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/orders:
+    get:
+      tags: [Admin]
+      summary: "Orders (status, search, page)"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/orders/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      tags: [Admin]
+      summary: "Order details"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    patch:
+      tags: [Admin]
+      summary: "Change order status (keeps product access consistent)"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"status": "COMPLETED"}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: "Users (search, status, page)"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/users/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    patch:
+      tags: [Admin]
+      summary: "Block/unblock or change role"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"status": "BLOCKED"}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/comments:
+    get:
+      tags: [Admin]
+      summary: "Comments for moderation"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/comments/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    patch:
+      tags: [Admin]
+      summary: "Hide / restore / mark pending"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"status": "HIDDEN"}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    delete:
+      tags: [Admin]
+      summary: "Delete (soft) a comment"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/portfolio:
+    get:
+      tags: [Admin]
+      summary: "Portfolio content"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    put:
+      tags: [Admin]
+      summary: "Replace portfolio content (hero, social links, skills, services, experiences)"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"hero_title": "Building [[digital products]]", "skills": [{"category": "backend", "name": "Go", "level": 90}]}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/media:
+    get:
+      tags: [Admin]
+      summary: "Uploaded files"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+    post:
+      tags: [Admin]
+      summary: "Upload an image (multipart field \"file\"; add private=true for ZIP/PDF products)"
+      security: [{bearer: []}]
+      responses:
+        "201": {description: Created}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/media/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    delete:
+      tags: [Admin]
+      summary: "Delete an uploaded file"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/contact-messages:
+    get:
+      tags: [Admin]
+      summary: "Contact messages (status filter)"
+      security: [{bearer: []}]
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /admin/contact-messages/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    patch:
+      tags: [Admin]
+      summary: "Set message status NEW/READ/REPLIED/ARCHIVED"
+      security: [{bearer: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object}
+            example: {"status": "READ"}
+      responses:
+        "200": {description: OK}
+        "400": {description: Malformed request, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "401": {description: Authentication required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "403": {description: Admin role required, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "404": {description: Not found, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "409": {description: Conflict, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: Validation error, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "429": {description: Rate limited, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}

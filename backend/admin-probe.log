@@ -1,0 +1,6 @@
+t=1s appVisible=false loginError=""
+t=2s appVisible=false loginError=""
+t=3s appVisible=false loginError=""
+t=4s appVisible=false loginError=""
+t=5s appVisible=true loginError=""
+FINAL appVisible=true navItems=8 dashboardRows=9

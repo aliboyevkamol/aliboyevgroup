@@ -1,0 +1,22 @@
+go: downloading github.com/lib/pq v1.10.9
+=== RUN   TestHealthAndEnvelope
+--- PASS: TestHealthAndEnvelope (0.11s)
+=== RUN   TestAuth
+--- PASS: TestAuth (2.13s)
+=== RUN   TestBlockedUserAndAdminAuthorization
+--- PASS: TestBlockedUserAndAdminAuthorization (0.56s)
+=== RUN   TestProductsPublic
+--- PASS: TestProductsPublic (0.15s)
+=== RUN   TestProjectsBlogSocial
+--- PASS: TestProjectsBlogSocial (0.69s)
+=== RUN   TestCartOrderPaymentFlow
+--- PASS: TestCartOrderPaymentFlow (2.93s)
+=== RUN   TestAdminContentCRUD
+--- PASS: TestAdminContentCRUD (0.94s)
+=== RUN   TestMediaUploadAndProtectedFiles
+--- PASS: TestMediaUploadAndProtectedFiles (0.15s)
+=== RUN   TestRateLimitAndMalformedInput
+--- PASS: TestRateLimitAndMalformedInput (5.98s)
+PASS
+ok  	kamolportfolio/backend/internal/api	25.389s
+DONE_EXIT_0 

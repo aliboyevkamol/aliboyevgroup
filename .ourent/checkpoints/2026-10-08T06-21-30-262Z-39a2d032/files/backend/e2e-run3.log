@@ -1,0 +1,22 @@
+PASS | GET /products -> 200, 0 records
+PASS | GET /projects -> 200, 0 records
+PASS | GET /posts -> 200, 1 records
+PASS | GET /portfolio -> 200, 8 records
+PASS | register rejects invalid input -> 422 {"confirm_password":"passwords do not match","email":"must be a valid email address","password":"must be 8-128 characters"}
+PASS | register creates account -> 200
+PASS | register sets refresh cookie cookies: kamol_rt
+PASS | duplicate email rejected -> 409
+PASS | wrong password rejected -> 401
+PASS | GET /auth/me with token -> 200 USER
+PASS | GET /auth/me without token = 401 -> 401
+PASS | admin endpoint forbidden for normal user -> 403
+PASS | admin endpoint forbidden anonymously -> 401
+file:///c:/Users/Kamol/Desktop/kamol-portfolio/backend/e2e-test.mjs:65
+  ok('product payload hides download_url', prod.download_url === undefined, `keys: ${Object.keys(prod).join(',')}`);
+                                                ^
+
+TypeError: Cannot read properties of undefined (reading 'download_url')
+    at file:///c:/Users/Kamol/Desktop/kamol-portfolio/backend/e2e-test.mjs:65:49
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+Node.js v22.23.3
