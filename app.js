@@ -81,14 +81,46 @@ const SEED_SKILLS = [
 /* ===================== API CLIENT & STATE =====================
    The backend (Go + PostgreSQL) is the source of truth. The access token lives only in memory;
    the refresh token is an HttpOnly cookie that JavaScript cannot read. */
+
 const API_ORIGIN = (() => {
- try { const o = localStorage.getItem('kamol_api_origin'); if (o) return o.replace(/\/$/, ''); } catch (e) {}
- const h = location.hostname;
- return location.protocol === 'file:' || ((h === 'localhost' || h === '127.0.0.1') && location.port !== '8080') ? 'http://localhost:8080' : '';
+  try {
+    const o = localStorage.getItem('kamol_api_origin');
+    if (o) return o.replace(/\/$/, '');
+  } catch (e) {}
+
+  const h = location.hostname;
+
+  if (
+    location.protocol === 'file:' ||
+    h === 'localhost' ||
+    h === '127.0.0.1'
+  ) {
+    return 'http://localhost:8080';
+  }
+
+  return 'https://aliboyevgroup-backend.vercel.app';
 })();
+
 const API_BASE = API_ORIGIN + '/api/v1';
+
 let accessToken = null;
-const ls = { get: (k, d) => { try { const v = localStorage.getItem('kamol_' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem('kamol_' + k, JSON.stringify(v)); } catch (e) {} } };
+
+const ls = {
+  get: (k, d) => {
+    try {
+      const v = localStorage.getItem('kamol_' + k);
+      return v ? JSON.parse(v) : d;
+    } catch (e) {
+      return d;
+    }
+  },
+  set: (k, v) => {
+    try {
+      localStorage.setItem('kamol_' + k, JSON.stringify(v));
+    } catch (e) {}
+  }
+};
+
 // Non-secret hint that a session may exist (so guests skip the refresh call). Session-only unless "Remember me".
 const hint = (on, persist) => { try { if (on === undefined) return localStorage.getItem('kamol_has_session') === '1' || sessionStorage.getItem('kamol_has_session') === '1'; localStorage.removeItem('kamol_has_session'); sessionStorage.removeItem('kamol_has_session'); if (on) (persist ? localStorage : sessionStorage).setItem('kamol_has_session', '1'); } catch (e) {} };
 const API = {
