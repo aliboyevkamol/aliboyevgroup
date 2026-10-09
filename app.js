@@ -98,7 +98,7 @@ const API_ORIGIN = (() => {
     return 'http://localhost:8080';
   }
 
-  return 'https://aliboyevgroup-backend.vercel.app';
+  return 'https://aliboyevgroup-backend.onrender.com/';
 })();
 
 const API_BASE = API_ORIGIN + '/api/v1';
