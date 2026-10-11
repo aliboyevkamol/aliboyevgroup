@@ -13,11 +13,7 @@ const BLOG = ['Development', 'AI', 'SaaS', 'Automation', 'Business', 'Tutorials'
 const STAT = ['Pending', 'Processing', 'Paid', 'Completed', 'Cancelled', 'Refunded'];
 
 /* ---------- API client ---------- */
-const ORIGIN = https://aliboyevgroup-backend.onrender.com
- try { const o = localStorage.getItem('kamol_api_origin'); if (o) return o.replace(/\/$/, ''); } catch (e) {}
- const h = location.hostname;
- return location.protocol === 'file:' || ((h === 'localhost' || h === '127.0.0.1') && location.port !== '8080') ? 'http://localhost:8080' : '';
-})();
+const ORIGIN = 'https://aliboyevgroup-backend.onrender.com';
 const BASE = ORIGIN + '/api/v1';
 let token = null, me = null;
 const hint = on => { try { on === undefined ? null : (on ? sessionStorage.setItem('kamol_admin_hint', '1') : sessionStorage.removeItem('kamol_admin_hint')); return sessionStorage.getItem('kamol_admin_hint') === '1'; } catch (e) { return false; } };
